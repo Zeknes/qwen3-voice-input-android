@@ -22,29 +22,40 @@ jobs:
         run: |
           mkdir -p app/libs
           curl -L -o app/libs/sherpa-onnx.aar "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.0/sherpa-onnx-1.13.0.aar"
-          ls -la app/libs/sherpa-onnx.aar
+          ls -la app/libs/
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace 2>&1 | tail -100
-          echo "EXIT: $?"
+          set -e
+          ./gradlew assembleDebug --stacktrace > /tmp/build.log 2>&1 || {
+            echo "=== BUILD FAILED - Last 300 lines ==="
+            tail -300 /tmp/build.log
+            exit 1
+          }
+          echo "BUILD SUCCESS"
+          tail -20 /tmp/build.log
 
-      - name: List outputs
+      - name: List all APK files
         if: always()
         run: |
-          echo "=== APK files ==="
-          find . -name "*.apk" -type f -ls 2>/dev/null
-          echo "=== build/outputs ==="
-          ls -laR app/build/outputs/ 2>/dev/null || echo "no outputs dir"
+          echo "=== Looking for APKs ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found anywhere"
+          echo "=== build/outputs contents ==="
+          ls -laR app/build/outputs/ 2>/dev/null || echo "No outputs directory"
+
+      - name: Copy APK to artifact dir
+        run: |
+          mkdir -p /tmp/apk
+          find app/build -name "*.apk" -exec cp {} /tmp/apk/ \;
+          ls -la /tmp/apk/
 
       - name: Upload APK
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qwen3-voice-debug
-          path: app/build/outputs/**/*.apk
+          path: /tmp/apk/*.apk
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
