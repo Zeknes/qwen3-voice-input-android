@@ -22,34 +22,28 @@ jobs:
         run: |
           mkdir -p app/libs
           curl -L -o app/libs/sherpa-onnx.aar "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.0/sherpa-onnx-1.13.0.aar"
-          ls -la app/libs/
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace --no-daemon --info 2>&1 > /tmp/build.log
-          EXIT_CODE=$?
-          echo "Gradle exit code: $EXIT_CODE"
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "=== LAST 500 LINES OF BUILD LOG ==="
-            tail -500 /tmp/build.log
-          fi
-          exit $EXIT_CODE
+          set -o pipefail
+          ./gradlew assembleDebug 2>&1 | tee build-output.log
+          echo "Gradle exit: ${PIPESTATUS[0]}"
 
-      - name: Copy APK
-        if: always()
-        run: |
-          mkdir -p /tmp/apk
-          find app/build -name "*.apk" -exec cp {} /tmp/apk/ \; 2>/dev/null || true
-          ls -la /tmp/apk/ 2>/dev/null || echo "no APK files"
-
-      - name: Upload APK
+      - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          name: build-log
+          path: build-output.log
+          if-no-files-found: ignore
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
           name: qwen3-voice-debug
-          path: /tmp/apk/*.apk
-          retention-days: 30
+          path: app/build/outputs/apk/**/*.apk
           if-no-files-found: warn
