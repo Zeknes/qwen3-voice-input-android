@@ -26,11 +26,34 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Inspect AAR contents
+        run: |
+          cd app/libs
+          echo "=== AAR file list ==="
+          unzip -l sherpa-onnx.aar | head -100
+          echo ""
+          echo "=== Checking for classes.jar ==="
+          unzip -l sherpa-onnx.aar | grep -i "classes\|\.jar" || echo "No JAR files found"
+          echo ""
+          echo "=== Checking for .so files ==="
+          unzip -l sherpa-onnx.aar | grep "\.so" || echo "No .so files found"
+
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          set +e
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee /tmp/build.log
+          BUILD_EXIT=$?
+          echo "Gradle exit code: $BUILD_EXIT"
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo ""
+            echo "=== BUILD FAILED - Last 400 lines ==="
+            tail -400 /tmp/build.log
+          fi
+          exit $BUILD_EXIT
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: qwen3-voice-debug
           path: app/build/outputs/apk/debug/*.apk
