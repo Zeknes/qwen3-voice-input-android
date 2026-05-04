@@ -29,33 +29,21 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          set -e
-          ./gradlew assembleDebug --stacktrace > /tmp/build.log 2>&1 || {
-            echo "=== BUILD FAILED - Last 300 lines ==="
-            tail -300 /tmp/build.log
-            exit 1
-          }
-          echo "BUILD SUCCESS"
-          tail -20 /tmp/build.log
+          set -eo pipefail
+          ./gradlew assembleDebug --stacktrace 2>&1 | tail -300
 
-      - name: List all APK files
+      - name: Copy APK
         if: always()
         run: |
-          echo "=== Looking for APKs ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found anywhere"
-          echo "=== build/outputs contents ==="
-          ls -laR app/build/outputs/ 2>/dev/null || echo "No outputs directory"
-
-      - name: Copy APK to artifact dir
-        run: |
           mkdir -p /tmp/apk
-          find app/build -name "*.apk" -exec cp {} /tmp/apk/ \;
-          ls -la /tmp/apk/
+          find app/build -name "*.apk" -exec cp {} /tmp/apk/ \; 2>/dev/null || true
+          ls -la /tmp/apk/ || echo "no APK files"
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qwen3-voice-debug
           path: /tmp/apk/*.apk
           retention-days: 30
-          if-no-files-found: error
+          if-no-files-found: warn
