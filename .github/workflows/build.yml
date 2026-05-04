@@ -29,15 +29,21 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          set -eo pipefail
-          ./gradlew assembleDebug --stacktrace 2>&1 | tail -300
+          ./gradlew assembleDebug --stacktrace --no-daemon --info 2>&1 > /tmp/build.log
+          EXIT_CODE=$?
+          echo "Gradle exit code: $EXIT_CODE"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "=== LAST 500 LINES OF BUILD LOG ==="
+            tail -500 /tmp/build.log
+          fi
+          exit $EXIT_CODE
 
       - name: Copy APK
         if: always()
         run: |
           mkdir -p /tmp/apk
           find app/build -name "*.apk" -exec cp {} /tmp/apk/ \; 2>/dev/null || true
-          ls -la /tmp/apk/ || echo "no APK files"
+          ls -la /tmp/apk/ 2>/dev/null || echo "no APK files"
 
       - name: Upload APK
         if: always()
