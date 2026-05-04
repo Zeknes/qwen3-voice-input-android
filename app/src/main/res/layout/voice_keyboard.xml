@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="#F5F5F5">
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tap_to_speak"
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="12dp" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ImageButton
+            android:id="@+id/mic_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_mic"
+            android:background="@android:drawable/btn_default"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/mic_button_desc"
+            android:padding="12dp" />
+
+        <View
+            android:id="@+id/recording_indicator"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_mic"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</LinearLayout>

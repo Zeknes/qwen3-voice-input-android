@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Qwen3 Voice</string>
+    <string name="tap_to_speak">Tap the microphone to speak</string>
+    <string name="listening">Listening…</string>
+    <string name="processing">Processing…</string>
+    <string name="mic_button_desc">Microphone button</string>
+    <string name="error_audio">Audio recording error</string>
+    <string name="error_model">Speech model not found</string>
+    <string name="transcribing">Transcribing…</string>
+</resources>
