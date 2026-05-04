@@ -22,28 +22,29 @@ jobs:
         run: |
           mkdir -p app/libs
           curl -L -o app/libs/sherpa-onnx.aar "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.0/sherpa-onnx-1.13.0.aar"
+          ls -la app/libs/sherpa-onnx.aar
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Locate APK
-        id: locate
         run: |
-          echo "=== All files under app/build/outputs ==="
-          find app/build/outputs -type f 2>/dev/null || echo "No outputs found"
-          echo "=== All APK files in project ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
-          APK_PATH=$(find . -name "*.apk" -type f | head -1)
-          echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
-          echo "Found APK: $APK_PATH"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tail -100
+          echo "EXIT: $?"
+
+      - name: List outputs
+        if: always()
+        run: |
+          echo "=== APK files ==="
+          find . -name "*.apk" -type f -ls 2>/dev/null
+          echo "=== build/outputs ==="
+          ls -laR app/build/outputs/ 2>/dev/null || echo "no outputs dir"
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
-        if: steps.locate.outputs.apk_path != ''
         with:
           name: qwen3-voice-debug
-          path: ${{ steps.locate.outputs.apk_path }}
+          path: app/build/outputs/**/*.apk
           retention-days: 30
+          if-no-files-found: warn
