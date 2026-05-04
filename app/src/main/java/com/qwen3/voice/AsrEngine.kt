@@ -20,26 +20,25 @@ class AsrEngine(private val modelDir: String) {
     fun initialize() {
         Log.d(TAG, "Initializing with modelDir=$modelDir")
 
-        val config = OfflineRecognizerConfig(
-            featConfig = FeatureConfig(
-                sampleRate = 16000,
-                featureDim = 80,
-            ),
-            modelConfig = OfflineModelConfig(
-                qwen3Asr = OfflineQwen3AsrModelConfig(
-                    convFrontend = "$modelDir/conv-frontend.onnx",
-                    encoder = "$modelDir/encoder.onnx",
-                    decoder = "$modelDir/decoder.onnx",
-                    tokenizer = "$modelDir/tokens.txt",
-                    maxNewTokens = 512,
-                ),
-                tokens = "$modelDir/tokens.txt",
-                numThreads = 4,
-                debug = false,
-                provider = "cpu",
-            ),
-            decodingMethod = "greedy_search",
-        )
+        val qwen3Config = OfflineQwen3AsrModelConfig()
+        qwen3Config.convFrontend = "$modelDir/conv_frontend.onnx"
+        qwen3Config.encoder = "$modelDir/encoder.int8.onnx"
+        qwen3Config.decoder = "$modelDir/decoder.int8.onnx"
+        qwen3Config.tokenizer = "$modelDir/tokenizer"
+        qwen3Config.maxTotalLen = 512
+        qwen3Config.maxNewTokens = 128
+
+        val modelConfig = OfflineModelConfig()
+        modelConfig.qwen3Asr = qwen3Config
+        modelConfig.tokens = ""
+        modelConfig.numThreads = 4
+        modelConfig.debug = false
+        modelConfig.provider = "cpu"
+
+        val config = OfflineRecognizerConfig()
+        config.featConfig = FeatureConfig(sampleRate = 16000, featureDim = 80)
+        config.modelConfig = modelConfig
+        config.decodingMethod = "greedy_search"
 
         recognizer = OfflineRecognizer(config = config)
         isInitialized = true

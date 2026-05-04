@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.qwen3.voice"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.qwen3.voice"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -23,17 +23,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
-    implementation("com.k2fsa.sherpa:sherpa-onnx:1.13.0")
+    implementation(files("libs/sherpa-onnx.aar"))
     implementation("org.apache.commons:commons-compress:1.27.1")
     implementation("org.tukaani:xz:1.10")
     implementation("androidx.core:core-ktx:1.15.0")
