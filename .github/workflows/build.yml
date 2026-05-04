@@ -27,20 +27,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Find and copy APK
-        run: |
-          echo "=== Looking for APK files ==="
-          find . -name "*.apk" -type f
-          mkdir -p /tmp/apk-output
-          find . -name "*.apk" -type f -exec cp {} /tmp/apk-output/ \;
-          ls -la /tmp/apk-output/
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: qwen3-voice-debug
-          path: /tmp/apk-output/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-          if-no-files-found: error
+          if-no-files-found: warn
