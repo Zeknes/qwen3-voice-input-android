@@ -28,17 +28,18 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          set -o pipefail
-          ./gradlew assembleDebug 2>&1 | tee build-output.log
-          echo "Gradle exit: ${PIPESTATUS[0]}"
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build-output.log
-          if-no-files-found: ignore
+          set +e
+          OUTPUT=$(./gradlew assembleDebug 2>&1)
+          EXIT_CODE=$?
+          # Write to step summary
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$OUTPUT" | tail -100 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Build failed with exit code $EXIT_CODE"
+            echo "$OUTPUT" | grep -i -E "(error|failure|failed|cannot|unable)" | head -20
+          fi
+          exit $EXIT_CODE
 
       - name: Upload APK
         if: success()
