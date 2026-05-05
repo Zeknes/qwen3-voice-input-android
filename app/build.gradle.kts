@@ -26,6 +26,12 @@ android {
         }
     }
 
+    // Don't compress .onnx files — they're already compressed, and this
+    // avoids OOM during build + lets Android mmap them at runtime
+    androidResources {
+        noCompress += listOf("onnx")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

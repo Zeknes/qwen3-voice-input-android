@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         updateStatus()
 
         downloadButton.setOnClickListener {
-            startDownload()
+            startExtract()
         }
 
         settingsButton.setOnClickListener {
@@ -47,50 +47,50 @@ class MainActivity : AppCompatActivity() {
     private fun updateStatus() {
         val modelReady = ModelManager.isModelReady(this)
         if (modelReady) {
-            statusText.text = "✅ Speech model downloaded and ready"
+            statusText.text = "✅ 语音模型已就绪"
             downloadButton.isEnabled = false
-            downloadButton.text = "Model Downloaded"
+            downloadButton.text = "模型已就绪"
             progressBar.visibility = View.GONE
             progressText.visibility = View.GONE
         } else {
-            statusText.text = "⚠️ Speech model needs to be downloaded (~500MB)"
+            statusText.text = "⏳ 首次使用需要释放模型文件（约 960MB）"
             downloadButton.isEnabled = true
-            downloadButton.text = "Download Model"
+            downloadButton.text = "释放模型"
             progressBar.visibility = View.GONE
             progressText.visibility = View.GONE
         }
     }
 
-    private fun startDownload() {
+    private fun startExtract() {
         downloadButton.isEnabled = false
-        downloadButton.text = "Downloading..."
+        downloadButton.text = "释放中..."
         progressBar.visibility = View.VISIBLE
         progressBar.progress = 0
         progressText.visibility = View.VISIBLE
-        progressText.text = "Starting download..."
+        progressText.text = "正在从应用内释放模型..."
 
-        ModelManager.downloadModel(
+        ModelManager.extractFromAssets(
             context = this,
             onProgress = { progress ->
                 runOnUiThread {
                     progressBar.progress = progress
-                    progressText.text = "Downloading: $progress%"
+                    progressText.text = "释放中: $progress%"
                 }
             },
             onComplete = {
                 runOnUiThread {
                     progressBar.progress = 100
-                    progressText.text = "Download complete!"
+                    progressText.text = "✅ 模型释放完成！"
                     updateStatus()
                 }
             },
             onError = { error ->
                 runOnUiThread {
-                    statusText.text = "❌ Download failed: $error"
+                    statusText.text = "❌ 释放失败: $error"
                     downloadButton.isEnabled = true
-                    downloadButton.text = "Retry Download"
+                    downloadButton.text = "重试"
                     progressBar.visibility = View.GONE
-                    progressText.text = "Error: $error"
+                    progressText.text = "错误: $error"
                 }
             }
         )
